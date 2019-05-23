@@ -24,4 +24,10 @@ void main() {
     expect(hash,
         '647df39ad889e83cc0b9b65375672d1bfe282565c564d3d553a435bf80e67d92');
   });
+
+  test('hash password', () async {
+    final hash = SignUtility.hashPassword('account@press.one', '123123');
+    expect(hash,
+        '2b16369e3a3a2b44bdef9d197b14b5448ebe960a5a2ddd57be434d983707aafd');
+  });
 }

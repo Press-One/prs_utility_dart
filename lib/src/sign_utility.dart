@@ -1,6 +1,5 @@
-import 'package:web3dart/web3dart.dart';
-import 'package:web3dart/crypto.dart';
-import 'package:pointycastle/digests/sha3.dart';
+import 'package:prs_utility_dart/src/web3dart/web3dart.dart';
+import 'package:prs_utility_dart/src/web3dart/crypto.dart';
 import 'dart:convert';
 
 import 'dart:async';
@@ -20,14 +19,11 @@ class SignUtility {
   }
 
   static String keecak256String(String str) {
-    final bytes = utf8.encode(str);
-    return keccak256Byte(bytes);
+    return bytesToHex(keccakUtf8(str));
   }
 
   static String keccak256Byte(List<int> data) {
-    final int _shaBytes = 256 ~/ 8;
-    final SHA3Digest sha3digest = SHA3Digest(_shaBytes * 8);
-    final result = bytesToHex(sha3digest.process(data));
+    final result = bytesToHex(keccak256(data));
     return result;
   }
 
@@ -58,8 +54,7 @@ class SignUtility {
   }
 
   static String hashPassword(email, password) {
-    final bytes = utf8.encode(password + email);
-    return keccak256Byte(bytes);
+    return keecak256String(password + email);
   }
 
   static Future<String> createKeystore(String password) async {
