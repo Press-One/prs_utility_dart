@@ -1,7 +1,7 @@
 part of 'package:prs_utility_dart/src/web3dart/credentials.dart';
 
 abstract class _KeyDerivator {
-  Uint8List deriveKey(Uint8List password);
+  Future<Uint8List> deriveKey(Uint8List password);
 
   String get name;
   Map<String, dynamic> encode();
@@ -19,11 +19,10 @@ class _PBDKDF2KeyDerivator extends _KeyDerivator {
   _PBDKDF2KeyDerivator(this.iterations, this.salt, this.dklen);
 
   @override
-  Uint8List deriveKey(Uint8List password) {
-    final impl = pbkdf2.PBKDF2KeyDerivator(mac)
-      ..init(Pbkdf2Parameters(salt, iterations, dklen));
-
-    return impl.process(password);
+  Future<Uint8List> deriveKey(Uint8List password) async {
+    final key = await PrsUtilityPlugin.pbkdf2(
+        utf8.decode(password), bytesToHex(salt), iterations, dklen);
+    return hexToBytes(key);
   }
 
   @override
@@ -50,9 +49,8 @@ class _ScryptKeyDerivator extends _KeyDerivator {
   _ScryptKeyDerivator(this.dklen, this.n, this.r, this.p, this.salt);
 
   @override
-  Uint8List deriveKey(Uint8List password) {
+  Future<Uint8List> deriveKey(Uint8List password) async {
     final impl = scrypt.Scrypt()..init(ScryptParameters(n, r, p, dklen, salt));
-
     return impl.process(password);
   }
 
@@ -96,8 +94,8 @@ class Wallet {
 
   /// Encrypts the private key using the secret specified earlier and returns
   /// a json representation of its data as a v3-wallet file.
-  String toJson() {
-    final ciphertextBytes = _encryptPrivateKey();
+  Future<String> toJson() async {
+    final ciphertextBytes = await _encryptPrivateKey();
 
     final map = {
       'crypto': {
@@ -106,7 +104,8 @@ class Wallet {
         'ciphertext': bytesToHex(ciphertextBytes),
         'kdf': _derivator.name,
         'kdfparams': _derivator.encode(),
-        'mac': _generateMac(_derivator.deriveKey(_password), ciphertextBytes),
+        'mac': _generateMac(
+            await _derivator.deriveKey(_password), ciphertextBytes),
       },
       'id': uuid,
       'version': 3,
@@ -140,7 +139,7 @@ class Wallet {
   /// Reads and unlocks the wallet denoted in the json string given with the
   /// specified [password]. [encoded] must be the String contents of a valid
   /// v3 Ethereum wallet file.
-  static Wallet fromJson(String encoded, String password) {
+  static Future<Wallet> fromJson(String encoded, String password) async {
     /*
       In order to read the wallet and obtain the secret key stored in it, we
       need to do the following:
@@ -168,7 +167,6 @@ class Wallet {
 
     final kdf = crypto['kdf'] as String;
     _KeyDerivator derivator;
-
     switch (kdf) {
       case 'pbkdf2':
         final derParams = crypto['kdfparams'] as Map<String, dynamic>;
@@ -182,7 +180,6 @@ class Wallet {
             derParams['c'] as int,
             Uint8List.fromList(hexToBytes(derParams['salt'] as String)),
             derParams['dklen'] as int);
-
         break;
       case 'scrypt':
         final derParams = crypto['kdfparams'] as Map<String, dynamic>;
@@ -200,7 +197,7 @@ class Wallet {
 
     // Now that we have the derivator, let's obtain the aes key:
     final encodedPassword = Uint8List.fromList(utf8.encode(password));
-    final derivedKey = derivator.deriveKey(encodedPassword);
+    final derivedKey = await derivator.deriveKey(encodedPassword);
     final aesKey = Uint8List.fromList(derivedKey.sublist(0, 16));
 
     final encryptedPrivateKey = hexToBytes(crypto['ciphertext'] as String);
@@ -243,8 +240,8 @@ class Wallet {
       ..init(false, ParametersWithIV(KeyParameter(key), iv));
   }
 
-  List<int> _encryptPrivateKey() {
-    final derived = _derivator.deriveKey(_password);
+  Future<List<int>> _encryptPrivateKey() async {
+    final derived = await _derivator.deriveKey(_password);
     final aesKey = Uint8List.view(derived.buffer, 0, 16);
 
     final aes = _initCipher(true, aesKey, _iv);

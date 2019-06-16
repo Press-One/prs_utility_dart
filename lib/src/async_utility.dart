@@ -13,11 +13,12 @@ class AsyncUtility {
   static void _isolate(SendPort initialReplyTo) async {
     final port = new ReceivePort();
     initialReplyTo.send(port.sendPort);
-    port.listen((message) {
+    port.listen((message) async {
       final func = message[0] as Function(List<dynamic>);
       final parameters = message[1] as List<dynamic>;
       final send = message[2] as SendPort;
-      send.send(func(parameters));
+      final result = await func(parameters);
+      send.send(result);
     });
   }
 }

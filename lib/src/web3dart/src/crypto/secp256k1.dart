@@ -25,7 +25,7 @@ BigInt generateNewPrivateKey(Random random) {
 
   final keyParams = ECKeyGeneratorParameters(_params);
 
-  generator.init(ParametersWithRandom(keyParams, RandomBridge(random)));
+  generator.init(ParametersWithRandom(keyParams, DartRandom(random)));
 
   final key = generator.generateKeyPair();
   final privateKey = key.privateKey as ECPrivateKey;

@@ -1,6 +1,6 @@
 name: prs_utility_dart
 description: prs utility.
-version: 0.0.1+5
+version: 0.0.3+2
 author: zhangpeng <zhangpengtongxue@gmail.com>
 homepage: https://press.one
 
@@ -13,13 +13,14 @@ dependencies:
   pointycastle: ^1.0.1
   convert: ^2.1.1
   meta: ^1.1.0
-  http: ^0.12.0
+  http: ^0.12.0 
   uuid: ^2.0.0
   isolate: ^2.0.0
   typed_data: ^1.1.6
   stream_channel: ^2.0.0
   json_rpc_2: ^2.1.0
   keccak: ^1.0.3
+  prs_utility_plugin: ^0.0.1+12
 
 dev_dependencies:
   flutter_test:

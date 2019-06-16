@@ -8,14 +8,23 @@ import 'async_utility.dart';
 
 class SignUtility {
   static Future<String> revert(String keystore, String password) async {
-    return await AsyncUtility.execute(_revert, [keystore, password]);
+    try {
+      var wallet = await Wallet.fromJson(keystore, password);
+      return bytesToHex(wallet.privateKey.privateKey);
+    } catch (err) {
+      throw err;
+    }
   }
 
-  static String _revert(List<dynamic> parameters) {
-    final keystore = parameters[0] as String;
-    final password = parameters[1] as String;
-    var wallet = Wallet.fromJson(keystore, password);
-    return bytesToHex(wallet.privateKey.privateKey);
+  static Future<String> _revert(List<dynamic> parameters) async {
+    try {
+      final keystore = parameters[0] as String;
+      final password = parameters[1] as String;
+      var wallet = await Wallet.fromJson(keystore, password);
+      return bytesToHex(wallet.privateKey.privateKey);
+    } catch (err) {
+      throw err;
+    }
   }
 
   static String keecak256String(String str) {
@@ -62,21 +71,39 @@ class SignUtility {
   }
 
   static Future<String> _createNewAccount(List<dynamic> parameters) async {
-    final password = parameters[0] as String;
-    var rng = new Random.secure();
-    final credentials = EthPrivateKey.createRandom(rng);
-    final wallet = Wallet.createNew(credentials, password, rng);
-    final str = wallet.toJson();
-    var keystore = json.decode(str);
-    var ethAddress = await credentials.extractAddress();
-    keystore['address'] = ethAddress.hexNo0x;
-    return json.encode(keystore);
+    try {
+      final password = parameters[0] as String;
+      var rng = new Random.secure();
+      final credentials = EthPrivateKey.createRandom(rng);
+      final wallet = Wallet.createNew(credentials, password, rng);
+      final str = await wallet.toJson();
+      var keystore = json.decode(str);
+      var ethAddress = await credentials.extractAddress();
+      keystore['address'] = ethAddress.hexNo0x;
+      return json.encode(keystore);
+    } catch (err) {
+      throw err;
+    }
   }
 
   static Future<String> generateNewKeystore(
       String keystore, String oldPassword, String newPassword) async {
-    return await AsyncUtility.execute(
-        _generateNewKeystore, [keystore, oldPassword, newPassword]);
+    // return await AsyncUtility.execute(
+    // _generateNewKeystore, [keystore, oldPassword, newPassword]);
+    try {
+      var rng = new Random.secure();
+      final credentials =
+          (await Wallet.fromJson(keystore, oldPassword)).privateKey;
+      final wallet = Wallet.createNew(credentials, newPassword, rng);
+      final str = await wallet.toJson();
+      var newKeystore = json.decode(str);
+
+      var ethAddress = await credentials.extractAddress();
+      newKeystore['address'] = ethAddress.hexNo0x;
+      return json.encode(newKeystore);
+    } catch (err) {
+      throw err;
+    }
   }
 
   static Future<String> _generateNewKeystore(List<dynamic> parameters) async {
@@ -86,16 +113,17 @@ class SignUtility {
 
     try {
       var rng = new Random.secure();
-      final credentials = Wallet.fromJson(keystore, oldPassword).privateKey;
+      final credentials =
+          (await Wallet.fromJson(keystore, oldPassword)).privateKey;
       final wallet = Wallet.createNew(credentials, newPassword, rng);
-      final str = wallet.toJson();
+      final str = await wallet.toJson();
       var newKeystore = json.decode(str);
 
       var ethAddress = await credentials.extractAddress();
       newKeystore['address'] = ethAddress.hexNo0x;
       return json.encode(newKeystore);
     } catch (err) {
-      return null;
+      throw err;
     }
   }
 
@@ -104,14 +132,18 @@ class SignUtility {
   }
 
   static String _signHash(List<dynamic> parameters) {
-    final hash = parameters[0] as String;
-    final privateKey = parameters[1] as String;
-    final privateKeyBytes = hexToBytes(privateKey);
-    final bytes = hexToBytes(hash);
-    final signature = sign(bytes, privateKeyBytes);
-    var result = bytesToHex(intToBytes(signature.r)) +
-        bytesToHex(intToBytes(signature.s)) +
-        (signature.v - 27).toString();
-    return result;
+    try {
+      final hash = parameters[0] as String;
+      final privateKey = parameters[1] as String;
+      final privateKeyBytes = hexToBytes(privateKey);
+      final bytes = hexToBytes(hash);
+      final signature = sign(bytes, privateKeyBytes);
+      var result = bytesToHex(intToBytes(signature.r)) +
+          bytesToHex(intToBytes(signature.s)) +
+          (signature.v - 27).toString();
+      return result;
+    } catch (err) {
+      throw err;
+    }
   }
 }
