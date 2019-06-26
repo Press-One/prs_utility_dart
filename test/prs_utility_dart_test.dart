@@ -27,4 +27,12 @@ void main() {
     final keystore = await SignUtility.createKeystore('123123');
     expect(keystore, isNotNull);
   });
+
+  test('recover address', () async {
+    final hash = SignUtility.keecak256String('hello prs');
+    String signature = await SignUtility.signHash(hash,
+        '6e204c62726a19fe3f43c4ca9739b7ffa37e4a3226f824f3e24e00a5890addc6');
+    final address = SignUtility.recoverAddress(signature, hash);
+    expect(address, '758ea2601697fbd3ba6eb6774ed70b6c4cdb0ef9');
+  });
 }

@@ -146,4 +146,8 @@ class SignUtility {
       throw err;
     }
   }
+
+  static String recoverAddress(String signature, String hash) {
+    return recoverAddressFromSignature(signature, hash);
+  }
 }

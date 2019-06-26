@@ -148,3 +148,38 @@ ECPoint _decompressKey(BigInt xBN, bool yBit, ECCurve c) {
   compEnc[0] = yBit ? 0x03 : 0x02;
   return c.decodePoint(compEnc);
 }
+
+String recoverAddressFromSignature(String signature, String hash) {
+  final n = _params.n;
+  BigInt r = hexToInt(signature.substring(0, 64));
+  BigInt s = hexToInt(signature.substring(64, 128));
+  int recId = hexToInt(signature.substring(128)).toInt();
+
+  final msg = hexToBytes(hash);
+
+  final i = BigInt.from(recId ~/ 2);
+  final x = r + (i * n);
+
+  //Parameter q of curve
+  final prime = BigInt.parse(
+      'fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f',
+      radix: 16);
+  if (x.compareTo(prime) >= 0) return null;
+
+  final R = _decompressKey(x, (recId & 1) == 1, _params.curve);
+  if (!(R * n).isInfinity) return null;
+
+  final e = bytesToInt(msg);
+
+  final eInv = (BigInt.zero - e) % n;
+  final rInv = r.modInverse(n);
+  final srInv = (rInv * s) % n;
+  final eInvrInv = (rInv * eInv) % n;
+
+  final q = (_params.G * eInvrInv) + (R * srInv);
+
+  final bytes = q.getEncoded(false);
+
+  final address = bytesToHex(publicKeyToAddress(bytes.sublist(1)));
+  return address;
+}
