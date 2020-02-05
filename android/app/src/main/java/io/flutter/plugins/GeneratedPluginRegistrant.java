@@ -1,7 +1,6 @@
 package io.flutter.plugins;
 
 import io.flutter.plugin.common.PluginRegistry;
-import one.press.prsutilityplugin.PrsUtilityPlugin;
 
 /**
  * Generated file. Do not edit.
@@ -11,7 +10,6 @@ public final class GeneratedPluginRegistrant {
     if (alreadyRegisteredWith(registry)) {
       return;
     }
-    PrsUtilityPlugin.registerWith(registry.registrarFor("one.press.prsutilityplugin.PrsUtilityPlugin"));
   }
 
   private static boolean alreadyRegisteredWith(PluginRegistry registry) {
