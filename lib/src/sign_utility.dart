@@ -10,7 +10,13 @@ import 'async_utility.dart';
 
 class SignUtility {
   static Future<String> revert(String keystore, String password) async {
+    return await AsyncUtility.execute(_revert, [keystore, password]);
+  }
+
+  static Future<String> _revert(List<dynamic> parameters) async {
     try {
+      final keystore = parameters[0] as String;
+      final password = parameters[1] as String;
       var wallet = Wallet.fromJson(keystore, password);
       return bytesToHex(wallet.privateKey.privateKey);
     } catch (err) {
@@ -81,19 +87,6 @@ class SignUtility {
       String keystore, String oldPassword, String newPassword) async {
     return await AsyncUtility.execute(
         _generateNewKeystore, [keystore, oldPassword, newPassword]);
-    // try {
-    //   var rng = new Random.secure();
-    //   final credentials = Wallet.fromJson(keystore, oldPassword).privateKey;
-    //   final wallet = Wallet.createNew(credentials, newPassword, rng);
-    //   final str = wallet.toJson();
-    //   var newKeystore = json.decode(str);
-
-    //   var ethAddress = await credentials.extractAddress();
-    //   newKeystore['address'] = ethAddress.hexNo0x;
-    //   return json.encode(newKeystore);
-    // } catch (err) {
-    //   throw err;
-    // }
   }
 
   static Future<String> _generateNewKeystore(List<dynamic> parameters) async {
