@@ -17,12 +17,6 @@ void main() {
         '647df39ad889e83cc0b9b65375672d1bfe282565c564d3d553a435bf80e67d92');
   });
 
-  test('sha256', () async {
-    final hash = SignUtility.sha256String('hello prs');
-    expect(hash,
-        '90d0bf6816660d8efa193f1d825c98e9eab08d9ca844fb92b3c1f6b74e4defe8');
-  });
-
   test('hash password', () async {
     final hash = SignUtility.hashPassword('account@press.one', '123123');
     expect(hash,

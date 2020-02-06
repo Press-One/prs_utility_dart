@@ -33,16 +33,6 @@ class SignUtility {
     return result;
   }
 
-  static String sha256String(String str) {
-    return sha256Byte(utf8.encode(str));
-  }
-
-  static String sha256Byte(List<int> data) {
-    final sha256 = Digest("SHA-256");
-    final result = bytesToHex(sha256.process(data));
-    return result;
-  }
-
   static String calcRequestHash(String path, Map<String, dynamic> payload) {
     final prefix = sortedToQueryString({'path': path});
     final sortedPayload = sortedToQueryString(payload);
