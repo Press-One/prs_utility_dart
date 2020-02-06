@@ -16,17 +16,6 @@ class SignUtility {
     }
   }
 
-  static Future<String> _revert(List<dynamic> parameters) async {
-    try {
-      final keystore = parameters[0] as String;
-      final password = parameters[1] as String;
-      var wallet = await Wallet.fromJson(keystore, password);
-      return bytesToHex(wallet.privateKey.privateKey);
-    } catch (err) {
-      throw err;
-    }
-  }
-
   static String keecak256String(String str) {
     return bytesToHex(keccakUtf8(str));
   }
@@ -88,22 +77,8 @@ class SignUtility {
 
   static Future<String> generateNewKeystore(
       String keystore, String oldPassword, String newPassword) async {
-    // return await AsyncUtility.execute(
-    // _generateNewKeystore, [keystore, oldPassword, newPassword]);
-    try {
-      var rng = new Random.secure();
-      final credentials =
-          (await Wallet.fromJson(keystore, oldPassword)).privateKey;
-      final wallet = Wallet.createNew(credentials, newPassword, rng);
-      final str = await wallet.toJson();
-      var newKeystore = json.decode(str);
-
-      var ethAddress = await credentials.extractAddress();
-      newKeystore['address'] = ethAddress.hexNo0x;
-      return json.encode(newKeystore);
-    } catch (err) {
-      throw err;
-    }
+    return await AsyncUtility.execute(
+        _generateNewKeystore, [keystore, oldPassword, newPassword]);
   }
 
   static Future<String> _generateNewKeystore(List<dynamic> parameters) async {
