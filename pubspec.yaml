@@ -1,7 +1,6 @@
 name: prs_utility_dart
 description: prs utility.
-version: 0.0.3+3
-author: zhangpeng <zhangpengtongxue@gmail.com>
+version: 0.1.0+1
 homepage: https://press.one
 
 environment:

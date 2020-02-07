@@ -1,3 +1,4 @@
+import 'package:pointycastle/pointycastle.dart';
 import 'package:prs_utility_dart/src/web3dart/web3dart.dart';
 import 'package:prs_utility_dart/src/web3dart/crypto.dart';
 import 'dart:convert';
@@ -22,6 +23,16 @@ class SignUtility {
 
   static String keccak256Byte(List<int> data) {
     final result = bytesToHex(keccak256(data));
+    return result;
+  }
+
+  static String sha256String(String str) {
+    return sha256Byte(utf8.encode(str));
+  }
+
+  static String sha256Byte(List<int> data) {
+    final sha256 = Digest("SHA-256");
+    final result = bytesToHex(sha256.process(data));
     return result;
   }
 
